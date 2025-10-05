@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الفندق</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .section-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-right: 4px solid #667eea;
+        }
+        
+        .nav-item {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .chart-container {
+            height: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-blue-600 to-purple-700 text-white p-4">
+            <div class="text-center mb-8">
+                <i class="fas fa-hotel text-4xl mb-2"></i>
+                <h1 class="text-xl font-bold">نظام إدارة الفندق</h1>
+            </div>
+            
+            <nav class="space-y-2">
+                <div class="nav-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt ml-3"></i>
+                    لوحة التحكم
+                </div>
+                <div class="nav-item" onclick="showSection('reservations')">
+                    <i class="fas fa-calendar-check ml-3"></i>
+                    إدارة الحجوزات
+                </div>
+                <div class="nav-item" onclick="showSection('rooms')">
+                    <i class="fas fa-bed ml-3"></i>
+                    إدارة الغرف
+                </div>
+                <div class="nav-item" onclick="showSection('guests')">
+                    <i class="fas fa-users ml-3"></i>
+                    إدارة الضيوف
+                </div>
+                <div class="nav-item" onclick="showSection('reports')">
+                    <i class="fas fa-chart-line ml-3"></i>
+                    التقارير المالية
+                </div>
+                <div class="nav-item" onclick="showSection('staff')">
+                    <i class="fas fa-user-tie ml-3"></i>
+                    إدارة الموظفين
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <!-- لوحة التحكم -->
+            <div id="dashboard" class="section">
+                <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-tachometer-alt ml-2"></i>
+                        لوحة التحكم الرئيسية
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">إجمالي الغرف</p>
+                                <p class="text-2xl font-bold text-gray-800">120</p>
+                            </div>
+                            <i class="fas fa-bed text-3xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">الغرف المحجوزة</p>
+                                <p class="text-2xl font-bold text-gray-800">85</p>
+                            </div>
+                            <i class="fas fa-calendar-check text-3xl text-green-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">الضيوف الحاليون</p>
+                                <p class="text-2xl font-bold text-gray-800">152</p>
+                            </div>
+                            <i class="fas fa-users text-3xl text-purple-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">إيرادات اليوم</p>
+                                <p class="text-2xl font-bold text-gray-800">25,400 ر.س</p>
+                            </div>
+                            <i class="fas fa-money-bill-wave text-3xl text-yellow-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4">معدل الإشغال الأسبوعي</h3>
+                        <canvas id="occupancyChart" style="height: 250px;"></canvas>
+                    </div>
+                    
+                    <div class="table-container">
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold mb-4">الحجوزات الحديثة</h3>
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-2 text-right">اسم الضيف</th>
+                                        <th class="p-2 text-right">رقم الغرفة</th>
+                                        <th class="p-2 text-right">تاريخ الوصول</th>
+                                        <th class="p-2 text-right">الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t">
+                                        <td class="p-2">أحمد محمد</td>
+                                        <td class="p-2">101</td>
+                                        <td class="p-2">2024-01-15</td>
+                                        <td class="p-2"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">مؤكد</span></td>
+                                    </tr>
+                                    <tr class="border-t">
+                                        <td class="p-2">فاطمة أحمد</td>
+                                        <td class="p-2">205</td>
+                                        <td class="p-2">2024-01-16</td>
+                                        <td class="p-2"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">في الانتظار</span></td>
+                                    </tr>
+                                    <tr class="border-t">
+                                        <td class="p-2">محمد علي</td>
+                                        <td class="p-2">312</td>
+                                        <td class="p-2">2024-01-17</td>
+                                        <td class="p-2"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">مؤكد</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إدارة الحجوزات -->
+            <div id="reservations" class="section hidden">
+                <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-calendar-check ml-2"></i>
+                        إدارة الحجوزات
+                    </h2>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 mb-6 shadow">
+                    <h3 class="text-lg font-semibold mb-4">إضافة حجز جديد</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" placeholder="اسم الضيف" class="form-input">
+                        <input type="date" placeholder="تاريخ الوصول" class="form-input">
+                        <input type="date" placeholder="تاريخ المغادرة" class="form-input">
+                        <select class="form-input">
+                            <option>نوع الغرفة</option>
+                            <option>غرفة عادية</option>
+                            <option>غرفة مزدوجة</option>
+                            <option>جناح</option>
+                        </select>
+                        <input type="number" placeholder="عدد الضيوف" class="form-input">
+                        <button class="btn-primary">إضافة الحجز</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-4">قائمة الحجوزات</h3>
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 text-right">رقم الحجز</th>
+                                    <th class="p-3 text-right">اسم الضيف</th>
+                                    <th class="p-3 text-right">رقم الغرفة</th>
+                                    <th class="p-3 text-right">تاريخ الوصول</th>
+                                    <th class="p-3 text-right">تاريخ المغادرة</th>
+                                    <th class="p-3 text-right">المبلغ</th>
+                                    <th class="p-3 text-right">الحالة</th>
+                                    <th class="p-3 text-right">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t">
+                                    <td class="p-3">#001</td>
+                                    <td class="p-3">أحمد محمد السعدي</td>
+                                    <td class="p-3">101</td>
+                                    <td class="p-3">2024-01-15</td>
+                                    <td class="p-3">2024-01-18</td>
+                                    <td class="p-3">1,200 ر.س</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">مؤكد</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">#002</td>
+                                    <td class="p-3">فاطمة أحمد النوري</td>
+                                    <td class="p-3">205</td>
+                                    <td class="p-3">2024-01-16</td>
+                                    <td class="p-3">2024-01-20</td>
+                                    <td class="p-3">2,000 ر.س</td>
+                                    <td class="p-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">في الانتظار</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">#003</td>
+                                    <td class="p-3">محمد علي الشمري</td>
+                                    <td class="p-3">312</td>
+                                    <td class="p-3">2024-01-17</td>
+                                    <td class="p-3">2024-01-22</td>
+                                    <td class="p-3">2,500 ر.س</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">مؤكد</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إدارة الغرف -->
+            <div id="rooms" class="section hidden">
+                <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-bed ml-2"></i>
+                        إدارة الغرف
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">الغرف المتاحة</p>
+                                <p class="text-2xl font-bold text-green-600">35</p>
+                            </div>
+                            <i class="fas fa-check-circle text-3xl text-green-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">الغرف المحجوزة</p>
+                                <p class="text-2xl font-bold text-blue-600">85</p>
+                            </div>
+                            <i class="fas fa-calendar-alt text-3xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">قيد الصيانة</p>
+                                <p class="text-2xl font-bold text-yellow-600">5</p>
+                            </div>
+                            <i class="fas fa-tools text-3xl text-yellow-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">خارج الخدمة</p>
+                                <p class="text-2xl font-bold text-red-600">2</p>
+                            </div>
+                            <i class="fas fa-times-circle text-3xl text-red-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="table-container">
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold mb-4">حالة الغرف</h3>
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-3 text-right">رقم الغرفة</th>
+                                        <th class="p-3 text-right">النوع</th>
+                                        <th class="p-3 text-right">الحالة</th>
+                                        <th class="p-3 text-right">السعر/ليلة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t">
+                                        <td class="p-3">101</td>
+                                        <td class="p-3">عادية</td>
+                                        <td class="p-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">محجوزة</span></td>
+                                        <td class="p-3">400 ر.س</td>
+                                    </tr>
+                                    <tr class="border-t">
+                                        <td class="p-3">102</td>
+                                        <td class="p-3">عادية</td>
+                                        <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">متاحة</span></td>
+                                        <td class="p-3">400 ر.س</td>
+                                    </tr>
+                                    <tr class="border-t">
+                                        <td class="p-3">201</td>
+                                        <td class="p-3">مزدوجة</td>
+                                        <td class="p-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">محجوزة</span></td>
+                                        <td class="p-3">600 ر.س</td>
+                                    </tr>
+                                    <tr class="border-t">
+                                        <td class="p-3">301</td>
+                                        <td class="p-3">جناح</td>
+                                        <td class="p-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">صيانة</span></td>
+                                        <td class="p-3">1,000 ر.س</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow">
+                        <h3 class="text-lg font-semibold mb-4">إضافة غرفة جديدة</h3>
+                        <div class="space-y-4">
+                            <input type="text" placeholder="رقم الغرفة" class="form-input">
+                            <select class="form-input">
+                                <option>نوع الغرفة</option>
+                                <option>غرفة عادية</option>
+                                <option>غرفة مزدوجة</option>
+                                <option>جناح</option>
+                                <option>جناح ملكي</option>
+                            </select>
+                            <input type="number" placeholder="السعر لليلة الواحدة" class="form-input">
+                            <select class="form-input">
+                                <option>الحالة</option>
+                                <option>متاحة</option>
+                                <option>محجوزة</option>
+                                <option>صيانة</option>
+                                <option>خارج الخدمة</option>
+                            </select>
+                            <textarea placeholder="وصف الغرفة" class="form-input h-20"></textarea>
+                            <button class="btn-primary w-full">إضافة الغرفة</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إدارة الضيوف -->
+            <div id="guests" class="section hidden">
+                <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-users ml-2"></i>
+                        إدارة الضيوف
+                    </h2>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 mb-6 shadow">
+                    <h3 class="text-lg font-semibold mb-4">تسجيل ضيف جديد</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" placeholder="الاسم الأول" class="form-input">
+                        <input type="text" placeholder="اسم العائلة" class="form-input">
+                        <input type="email" placeholder="البريد الإلكتروني" class="form-input">
+                        <input type="tel" placeholder="رقم الهاتف" class="form-input">
+                        <input type="text" placeholder="رقم الهوية/الجواز" class="form-input">
+                        <select class="form-input">
+                            <option>الجنسية</option>
+                            <option>سعودي</option>
+                            <option>مقيم</option>
+                            <option>زائر</option>
+                        </select>
+                    </div>
+                    <div class="mt-4">
+                        <textarea placeholder="العنوان" class="form-input h-20"></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn-primary">تسجيل الضيف</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-4">قائمة الضيوف</h3>
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 text-right">الاسم</th>
+                                    <th class="p-3 text-right">البريد الإلكتروني</th>
+                                    <th class="p-3 text-right">الهاتف</th>
+                                    <th class="p-3 text-right">رقم الغرفة</th>
+                                    <th class="p-3 text-right">تاريخ الوصول</th>
+                                    <th class="p-3 text-right">الحالة</th>
+                                    <th class="p-3 text-right">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t">
+                                    <td class="p-3">أحمد محمد السعدي</td>
+                                    <td class="p-3">ahmed@email.com</td>
+                                    <td class="p-3">+966501234567</td>
+                                    <td class="p-3">101</td>
+                                    <td class="p-3">2024-01-15</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">نشط</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-user-times"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">فاطمة أحمد النوري</td>
+                                    <td class="p-3">fatima@email.com</td>
+                                    <td class="p-3">+966507654321</td>
+                                    <td class="p-3">205</td>
+                                    <td class="p-3">2024-01-16</td>
+                                    <td class="p-3"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">وصل اليوم</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-user-times"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">محمد علي الشمري</td>
+                                    <td class="p-3">mohammed@email.com</td>
+                                    <td class="p-3">+966509876543</td>
+                                    <td class="p-3">312</td>
+                                    <td class="p-3">2024-01-14</td>
+                                    <td class="p-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">يغادر اليوم</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-user-times"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- التقارير المالية -->
+            <div id="reports" class="section hidden">
+                <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-chart-line ml-2"></i>
+                        التقارير المالية
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">إيرادات الشهر</p>
+                                <p class="text-2xl font-bold text-green-600">485,200 ر.س</p>
+                            </div>
+                            <i class="fas fa-money-bill-wave text-3xl text-green-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">المصروفات</p>
+                                <p class="text-2xl font-bold text-red-600">125,800 ر.س</p>
+                            </div>
+                            <i class="fas fa-receipt text-3xl text-red-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">صافي الربح</p>
+                                <p class="text-2xl font-bold text-blue-600">359,400 ر.س</p>
+                            </div>
+                            <i class="fas fa-chart-line text-3xl text-blue-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4">الإيرادات الشهرية</h3>
+                        <canvas id="revenueChart" style="height: 250px;"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3 class="text-lg font-semibold mb-4">توزيع الإيرادات حسب نوع الغرفة</h3>
+                        <canvas id="roomTypeChart" style="height: 250px;"></canvas>
+                    </div>
+                </div>
+
+                <div class="table-container mt-6">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-4">تفصيل المعاملات المالية</h3>
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 text-right">التاريخ</th>
+                                    <th class="p-3 text-right">الوصف</th>
+                                    <th class="p-3 text-right">النوع</th>
+                                    <th class="p-3 text-right">المبلغ</th>
+                                    <th class="p-3 text-right">الرصيد</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t">
+                                    <td class="p-3">2024-01-15</td>
+                                    <td class="p-3">حجز غرفة 101 - أحمد محمد</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">إيراد</span></td>
+                                    <td class="p-3 text-green-600">+1,200 ر.س</td>
+                                    <td class="p-3">485,200 ر.س</td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">2024-01-15</td>
+                                    <td class="p-3">صيانة مكيفات الطابق الثاني</td>
+                                    <td class="p-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">مصروف</span></td>
+                                    <td class="p-3 text-red-600">-2,500 ر.س</td>
+                                    <td class="p-3">484,000 ر.س</td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">2024-01-14</td>
+                                    <td class="p-3">حجز جناح 301 - فاطمة أحمد</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">إيراد</span></td>
+                                    <td class="p-3 text-green-600">+2,000 ر.س</td>
+                                    <td class="p-3">486,500 ر.س</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إدارة الموظفين -->
+            <div id="staff" class="section hidden">
+                <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-user-tie ml-2"></i>
+                        إدارة الموظفين
+                    </h2>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 mb-6 shadow">
+                    <h3 class="text-lg font-semibold mb-4">إضافة موظف جديد</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" placeholder="اسم الموظف" class="form-input">
+                        <input type="email" placeholder="البريد الإلكتروني" class="form-input">
+                        <input type="tel" placeholder="رقم الهاتف" class="form-input">
+                        <select class="form-input">
+                            <option>القسم</option>
+                            <option>الاستقبال</option>
+                            <option>خدمة الغرف</option>
+                            <option>المطعم</option>
+                            <option>الصيانة</option>
+                            <option>الأمن</option>
+                            <option>التنظيف</option>
+                        </select>
+                        <select class="form-input">
+                            <option>المنصب</option>
+                            <option>مدير</option>
+                            <option>مشرف</option>
+                            <option>موظف</option>
+                            <option>متدرب</option>
+                        </select>
+                        <input type="number" placeholder="الراتب" class="form-input">
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn-primary">إضافة الموظف</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">إجمالي الموظفين</p>
+                                <p class="text-2xl font-bold text-blue-600">45</p>
+                            </div>
+                            <i class="fas fa-users text-3xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">الموظفون الحاضرون</p>
+                                <p class="text-2xl font-bold text-green-600">38</p>
+                            </div>
+                            <i class="fas fa-user-check text-3xl text-green-500"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">في إجازة</p>
+                                <p class="text-2xl font-bold text-yellow-600">7</p>
+                            </div>
+                            <i class="fas fa-calendar-times text-3xl text-yellow-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-4">قائمة الموظفين</h3>
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-3 text-right">الاسم</th>
+                                    <th class="p-3 text-right">القسم</th>
+                                    <th class="p-3 text-right">المنصب</th>
+                                    <th class="p-3 text-right">الهاتف</th>
+                                    <th class="p-3 text-right">الراتب</th>
+                                    <th class="p-3 text-right">الحالة</th>
+                                    <th class="p-3 text-right">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t">
+                                    <td class="p-3">سعد أحمد الغامدي</td>
+                                    <td class="p-3">الاستقبال</td>
+                                    <td class="p-3">مدير</td>
+                                    <td class="p-3">+966501234567</td>
+                                    <td class="p-3">8,000 ر.س</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">نشط</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-user-times"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">نوال محمد القحطاني</td>
+                                    <td class="p-3">خدمة الغرف</td>
+                                    <td class="p-3">مشرفة</td>
+                                    <td class="p-3">+966507654321</td>
+                                    <td class="p-3">5,500 ر.س</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">نشط</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-user-times"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">خالد سالم العتيبي</td>
+                                    <td class="p-3">الصيانة</td>
+                                    <td class="p-3">فني</td>
+                                    <td class="p-3">+966509876543</td>
+                                    <td class="p-3">4,200 ر.س</td>
+                                    <td class="p-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">إجازة</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-user-times"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="p-3">منى عبدالله الدوسري</td>
+                                    <td class="p-3">التنظيف</td>
+                                    <td class="p-3">موظفة</td>
+                                    <td class="p-3">+966502468135</td>
+                                    <td class="p-3">3,500 ر.س</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">نشط</span></td>
+                                    <td class="p-3">
+                                        <button class="text-blue-600 ml-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600"><i class="fas fa-user-times"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update active nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Initialize charts when showing dashboard or reports
+            if (sectionId === 'dashboard') {
+                setTimeout(initDashboardChart, 100);
+            } else if (sectionId === 'reports') {
+                setTimeout(initReportsCharts, 100);
+            }
+        }
+
+        // Initialize dashboard chart
+        function initDashboardChart() {
+            const ctx = document.getElementById('occupancyChart');
+            if (ctx && !ctx.chartInstance) {
+                ctx.chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                        datasets: [{
+                            label: 'معدل الإشغال %',
+                            data: [65, 72, 68, 75, 82, 88, 95],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize reports charts
+        function initReportsCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx && !revenueCtx.chartInstance) {
+                revenueCtx.chartInstance = new Chart(revenueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+                        datasets: [{
+                            label: 'الإيرادات (ألف ريال)',
+                            data: [420, 385, 461, 523, 485, 512],
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: '#667eea',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Room Type Chart
+            const roomTypeCtx = document.getElementById('roomTypeChart');
+            if (roomTypeCtx && !roomTypeCtx.chartInstance) {
+                roomTypeCtx.chartInstance = new Chart(roomTypeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['غرف عادية', 'غرف مزدوجة', 'أجنحة', 'أجنحة ملكية'],
+                        datasets: [{
+                            data: [45, 30, 20, 5],
+                            backgroundColor: [
+                                '#667eea',
+                                '#764ba2',
+                                '#f093fb',
+                                '#f5576c'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        // Initialize dashboard chart on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboardChart();
+        });
+    </script>
+</body>
+</html>
